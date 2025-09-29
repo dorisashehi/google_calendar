@@ -1,7 +1,7 @@
 """
 Interactive CLI client for Google Calendar MCP Server
 
-This lets you schedule and manage meetings through simple text commands.
+Supports: list_meetings, create_meeting, auto_schedule_meeting, delete_meeting
 """
 
 import asyncio
@@ -9,6 +9,16 @@ import re
 from datetime import datetime, timedelta
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
+
+OPTIONS_MENU = """
+Choose one of these options:
+  1. list → Show upcoming meetings
+  2. schedule <title> tomorrow at <time> with <email> → Create a meeting
+  3. auto <title> for <minutes> → Auto-schedule a meeting
+  4. delete <event_id> → Delete a meeting by ID
+  5. quit → Exit
+"""
 
 
 async def interactive_client():
@@ -28,42 +38,36 @@ async def interactive_client():
                 await session.initialize()
                 print("✅ Connected to MCP server!")
 
-                # List available tools
-                print("\n📋 Available tools:")
-                tools = await session.list_tools()
-                for tool in tools.tools:
-                    print(f"  - {tool.name}: {tool.description}")
-                print("\n🤖 Interactive Mode Started")
-                print("Type commands like:")
-                print("  - list")
-                print("  - schedule team sync tomorrow at 2pm with bob@example.com")
-                print("  - auto project review for 45")
-                print("  - quit\n")
+                print("\n🤖 Google Calendar MCP Client")
+                print("=" * 40)
+                print(OPTIONS_MENU)
 
                 while True:
                     user_input = input("You: ").strip()
 
-                    if user_input.lower() in ("quit", "exit"):
+                    # Exit
+                    if user_input.lower() in ("quit", "exit", "5"):
                         print("👋 Goodbye!")
                         break
 
-                    elif user_input.lower() == "list":
-                        print("📅 Fetching your upcoming meetings...")
+                    # List meetings
+                    elif user_input.lower() in ("list", "1"):
                         result = await session.call_tool(
                             name="list_meetings",
                             arguments={"max_results": 10}
                         )
                         print("Result:", result.content[0].text)
+                        print(OPTIONS_MENU)
 
-                    elif user_input.lower().startswith("schedule "):
-                        # Basic parsing: extract emails + time
-                        text = user_input[9:]
+                    # Create meeting
+                    elif user_input.lower().startswith("schedule ") or user_input.startswith("2 "):
+                        text = user_input[9:] if user_input.lower().startswith("schedule ") else user_input[2:]
                         attendees = []
                         emails = re.findall(r'[\w\.-]+@[\w\.-]+', text)
                         if emails:
                             attendees = emails
 
-                        # crude date/time parsing
+                        # crude parsing: "tomorrow" sets meeting for 2pm tomorrow
                         if "tomorrow" in text.lower():
                             start_time = datetime.utcnow() + timedelta(days=1)
                             start_time = start_time.replace(hour=14, minute=0, second=0, microsecond=0)
@@ -86,10 +90,11 @@ async def interactive_client():
                             }
                         )
                         print("Result:", result.content[0].text)
+                        print(OPTIONS_MENU)
 
-                    elif user_input.lower().startswith("auto "):
-                        text = user_input[5:]
-                        # detect duration like "for 45"
+                    # Auto-schedule meeting
+                    elif user_input.lower().startswith("auto ") or user_input.startswith("3 "):
+                        text = user_input[5:] if user_input.lower().startswith("auto ") else user_input[2:]
                         duration = 60
                         match = re.search(r'for (\d+)', text)
                         if match:
@@ -105,20 +110,34 @@ async def interactive_client():
                             }
                         )
                         print("Result:", result.content[0].text)
+                        print(OPTIONS_MENU)
 
+                    # Delete meeting
+                    elif user_input.lower().startswith("delete ") or user_input.startswith("4 "):
+                        event_id = user_input[7:] if user_input.lower().startswith("delete ") else user_input[2:]
+                        event_id = event_id.strip()
+
+                        if not event_id:
+                            print("⚠️ You must provide an event_id (get it from the 'list' command).")
+                        else:
+                            result = await session.call_tool(
+                                name="delete_meeting",
+                                arguments={"event_id": event_id}
+                            )
+                            print("Result:", result.content[0].text)
+                        print(OPTIONS_MENU)
+
+                    # Invalid option
                     else:
-                        print("❓ Unknown command. Try:")
-                        print("  - list")
-                        print("  - schedule team sync tomorrow at 2pm with alice@example.com")
-                        print("  - auto project review for 30")
-                        print("  - quit")
+                        print("\n❌ Doesn’t match.")
+                        print(OPTIONS_MENU)
 
     except Exception as e:
         print(f"❌ Error connecting to server: {e}")
         print("\n💡 Make sure you have:")
         print("  1. Installed dependencies: pip install -r requirements.txt")
         print("  2. Set up Google Calendar credentials (credentials.json + token.json)")
-        print("  3. The calendar_server.py file in the same directory")
+        print("  3. The calendar_server.py file is in the same directory")
 
 
 if __name__ == "__main__":
