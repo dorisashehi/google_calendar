@@ -6,6 +6,7 @@ Supports: list_meetings, create_meeting, auto_schedule_meeting, delete_meeting
 
 import asyncio
 import re
+import dateparser  # NEW: for natural language date/time parsing
 from datetime import datetime, timedelta
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -14,7 +15,9 @@ from mcp.client.stdio import stdio_client
 OPTIONS_MENU = """
 Choose one of these options:
   1. list → Show upcoming meetings
-  2. schedule <title> tomorrow at <time> with <email> → Create a meeting
+  2. schedule <title> on <date/time> with <email> → Create a meeting
+     e.g., "schedule project kickoff on 2025-10-05 at 15:30 with alice@example.com"
+     e.g., "schedule sync tomorrow at 3pm with bob@example.com"
   3. auto <title> for <minutes> → Auto-schedule a meeting
   4. delete <event_id> → Delete a meeting by ID
   5. quit → Exit
@@ -67,11 +70,13 @@ async def interactive_client():
                         if emails:
                             attendees = emails
 
-                        # crude parsing: "tomorrow" sets meeting for 2pm tomorrow
-                        if "tomorrow" in text.lower():
-                            start_time = datetime.utcnow() + timedelta(days=1)
-                            start_time = start_time.replace(hour=14, minute=0, second=0, microsecond=0)
+                        # Try parsing any natural date/time expression
+                        parsed_time = dateparser.parse(text)
+
+                        if parsed_time:
+                            start_time = parsed_time
                         else:
+                            print("⚠️ Could not parse date/time, defaulting to 1 hour from now.")
                             start_time = datetime.utcnow() + timedelta(hours=1)
 
                         end_time = start_time + timedelta(hours=1)
@@ -136,8 +141,9 @@ async def interactive_client():
         print(f"❌ Error connecting to server: {e}")
         print("\n💡 Make sure you have:")
         print("  1. Installed dependencies: pip install -r requirements.txt")
-        print("  2. Set up Google Calendar credentials (credentials.json + token.json)")
-        print("  3. The calendar_server.py file is in the same directory")
+        print("  2. Installed dateparser: pip install dateparser")
+        print("  3. Set up Google Calendar credentials (credentials.json + token.json)")
+        print("  4. The calendar_server.py file is in the same directory")
 
 
 if __name__ == "__main__":
