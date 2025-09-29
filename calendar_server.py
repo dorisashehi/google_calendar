@@ -24,8 +24,9 @@ mcp = FastMCP("google-calendar")
 
 # Google Calendar API configuration
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-CREDENTIALS_FILE = 'credentials.json'
-TOKEN_FILE = 'token.json'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CREDENTIALS_FILE = os.path.join(BASE_DIR, "credentials.json")
+TOKEN_FILE = os.path.join(BASE_DIR, "token.json")
 
 class GoogleCalendarService:
     """Handles Google Calendar API authentication and operations."""
