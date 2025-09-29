@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "google-calendar": {
+      "command": "python3",
+      "args": ["/home/dorisa/Public/AI/MCP/goole_meetings/calendar_server.py"],
+      "env": {
+        "PYTHONPATH": "/home/dorisa/Public/AI/MCP/goole_meetings"
+      }
+    }
+  }
+}
