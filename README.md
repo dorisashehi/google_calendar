@@ -148,3 +148,4 @@ Once you understand this basic example, you can:
 - [FastMCP](https://fastmcp.cloud/) - Easy MCP server creation
 
 Happy coding! 🚀
+# google_calendar
