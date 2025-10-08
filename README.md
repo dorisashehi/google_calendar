@@ -140,9 +140,3 @@ Once you understand this basic example, you can:
 2. **Improve the AI** - Better natural language understanding
 3. **Add integrations** - Connect to other services
 4. **Create your own MCP server** - For other APIs and services
-
-## Learning Resources
-
-- [MCP Documentation](https://modelcontextprotocol.io/)
-- [Google Calendar API](https://developers.google.com/calendar)
-- [FastMCP](https://fastmcp.cloud/) - Easy MCP server creation
