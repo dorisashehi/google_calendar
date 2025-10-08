@@ -1,10 +1,10 @@
-# Google Calendar MCP Agent
+# Google Calendar
 
-A simple Model Context Protocol (MCP) server that provides Google Calendar integration for auto-scheduling meetings. Perfect for beginners to understand MCP concepts!
+A simple MCP server that provides Google Calendar integration for auto-scheduling meetings. Perfect for beginners to understand MCP concepts!
 
 ## What is MCP?
 
-MCP (Model Context Protocol) is a way for AI agents to use tools and access external services. Think of it as a bridge between AI and real-world applications like Google Calendar.
+MCP is a way for AI agents to use tools and access external services. Think of it as a bridge between AI and real-world applications like Google Calendar.
 
 ## What This Agent Can Do
 
@@ -146,6 +146,3 @@ Once you understand this basic example, you can:
 - [MCP Documentation](https://modelcontextprotocol.io/)
 - [Google Calendar API](https://developers.google.com/calendar)
 - [FastMCP](https://fastmcp.cloud/) - Easy MCP server creation
-
-Happy coding! 🚀
-# google_calendar
